@@ -1,0 +1,30 @@
+# Publishes main to the root of the gh-pages branch (the live site).
+# PR previews live under /pr-preview/ on the same branch and are left untouched.
+# Settings → Pages → Source must be "Deploy from a branch: gh-pages / (root)".
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish to gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: .
+          clean-exclude: pr-preview/
+          force: false
