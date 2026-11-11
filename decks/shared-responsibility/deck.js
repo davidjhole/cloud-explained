@@ -14,7 +14,7 @@
     const owners = stack.dataset.owner.split("");
     PIZZA_LAYERS.forEach((l, i) => {
       const d = document.createElement("div");
-      d.className = `pz-layer ${owners[i]}${i === PIZZA_LAYERS.length - 1 ? " top" : ""}`;
+      d.className = `pz-layer sk ${owners[i]}${i === PIZZA_LAYERS.length - 1 ? " top" : ""}`;
       d.innerHTML = `<span>${l.icon}</span><span>${l.name}</span><span class="who">${owners[i] === "C" ? "You" : "Them"}</span>`;
       stack.appendChild(d);
     });
@@ -59,11 +59,12 @@
   ];
   const WHO = { C: "Us", S: "Shared", P: "Provider" };
 
-  const stackEl = document.getElementById("layer-stack");
+  const stackEl = document.getElementById("floors");
+  const lineEl = document.getElementById("the-line");
   const tabs = Array.from(document.querySelectorAll(".model-tabs .btn"));
   const layerEls = LAYERS.map((l) => {
     const d = document.createElement("div");
-    d.className = "layer C";
+    d.className = "layer sk C";
     d.innerHTML = `<span class="l-icon">${l.icon}</span><span class="l-name">${l.name}</span><span class="l-plain">${l.plain}</span><span class="l-who">Us</span>`;
     stackEl.appendChild(d);
     return d;
@@ -79,15 +80,24 @@
       counts[who]++;
       const el = layerEls[i];
       const before = el.classList.contains(who);
-      el.className = `layer ${who}`;
+      el.className = `layer sk ${who}`;
       el.querySelector(".l-who").textContent = WHO[who];
       if (!before) {
-        // Stagger flips bottom-up so the provider "rises" through the stack.
+        // Stagger bumps bottom-up so the provider "rises" through the building.
         el.style.animationDelay = `${(LAYERS.length - 1 - i) * 45}ms`;
         void el.offsetWidth;
-        el.classList.add("flip");
+        el.classList.add("bump");
       }
     });
+    // "The line": sits above the top-most floor the provider runs on its own.
+    const firstP = LAYERS.findIndex((l) => l.own[m] === "P");
+    if (firstP < 0) {
+      lineEl.classList.add("is-hidden");
+    } else {
+      lineEl.classList.remove("is-hidden");
+      const floor = layerEls[firstP];
+      lineEl.style.top = `${floor.offsetTop - 4}px`;
+    }
     tabs.forEach((t, i) => {
       t.classList.toggle("is-on", i === m);
       t.setAttribute("aria-selected", String(i === m));

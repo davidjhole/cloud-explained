@@ -20,6 +20,7 @@ assets/engine.css             Design system, theme token defaults, slide engine 
 assets/engine.js              Slide engine (navigation, steps, notes, presenter sync, overview, playlist)
 assets/themes.js              Theme PRESETS (colour tokens). Add new presets here
 assets/theme.js               Theme RUNTIME: applies tokens, derives tints, theme panel, client logo
+assets/sketch.js              Sketch kit: hand-drawn SVG filters + reusable doodle characters
 assets/fonts/                 Self-hosted woff2 fonts (SIL OFL), with LICENSE.txt
 decks/registry.js             The list of decks. Only real, merged decks go here
 decks/_template/              Copy this to start a new deck
@@ -38,7 +39,7 @@ decks/<deck-id>/deck.js       Deck-specific interactions
 
 ## Adding a new deck
 
-1. Copy `decks/_template/` to `decks/<deck-id>/` (kebab-case id). The template already loads the theme scripts in `<head>`. Keep them.
+1. Copy `decks/_template/` to `decks/<deck-id>/` (kebab-case id). The template already loads the theme scripts in `<head>` and `assets/sketch.js` before `engine.js`. Keep them.
 2. Set `<body data-deck="<deck-id>">` and the `<title>`.
 3. Add the entry to `decks/registry.js`.
 4. Build slides as `<section class="slide">` inside `<div class="deck">`, following **Theming** below.
@@ -92,6 +93,7 @@ Derived tokens are set automatically. Use them, and never recompute them:
 - `--paper-2`: subtle fill, e.g. tags
 - `--line`: borders and dividers
 - `--dot`: background dot texture
+- `--grid`: whiteboard grid lines
 - `--ink-soft`, `--ink-faint`: muted text
 - `--deep`, `--deep-2`, `--on-deep`, `--on-deep-soft`: `.dark` slides and the cards on them. In dark themes `--deep` is darker than the background, not inverted
 - `--on-ink`: text on ink-filled things, e.g. a selected `.btn`
@@ -99,6 +101,8 @@ Derived tokens are set automatically. Use them, and never recompute them:
 - `--customer-deep`, `--provider-deep`, `--shared-deep`, `--shared-light`: stripes and pressed states
 - `--on-customer`, `--on-provider`, `--on-shared`, `--on-sun`, `--on-good`, `--on-bad`: readable text on a solid fill. This is automatically white or near-black
 - `--ink-rgb`: for shadows, as `rgba(var(--ink-rgb), 0.1)`
+
+Deliberately *not* themed (theme-exempt): `--skin` and `--hair`, the natural skin and hair colours of doodle characters.
 
 ### Rules for slide authors
 
@@ -110,13 +114,45 @@ Derived tokens are set automatically. Use them, and never recompute them:
 6. Keep the **bottom-left 200×70px of every slide clear** for the client logo.
 7. Don't load fonts or assets from external CDNs. Add woff2 files to `assets/fonts/` with their licence.
 
-## Visual language
+## Visual language: "whiteboard sketch" (house style)
 
-- Fonts: Bricolage Grotesque (display) and Inter (body), self-hosted.
-- Building blocks: `.card`, `.btn` (`.is-on` for selected), `.pill`, `.tag`, `.kicker`, `.lead`, `.hl` (highlighter underline), `.fill-*`.
-- Chunky ink borders (3px) with solid offset shadows give a friendly "whiteboard sticker" feel.
-- Illustration style is **still being decided**. Two mockups are under review: (A) hand-drawn whiteboard sketch, and (B) clean illustrated isometric. Both must follow the Theming rules. Update this section once one is chosen.
-- Visuals are HTML/CSS/inline SVG and emoji. **No copyrighted images, logos or brand marks** in the repo. Refer to providers by name in text only. Client logos are only ever added at presentation time through the theme panel.
+Every deck looks like a cloud architect sketching on a whiteboard for the board: **hand-drawn edges, scribbled notes, simple doodle characters, but clean, bold headlines and plain-English body text**, so it stays professional. This was mockup A, chosen in November 2026. A fuller brand style guide (`BRAND.md`) is planned (see Follow-ups). Until it exists, this section is the reference.
+
+### Type
+- **Headlines:** Bricolage Grotesque (`--font-display`), bold and clean, never hand-written.
+- **Body:** Inter (`--font-body`).
+- **Scribbled notes:** Caveat (`--font-hand`, class `.scribble`). Use these for kickers, asides, speech, arrows' labels and "punchline" lines. Keep them short, lower-case and conversational.
+- **Hand-lettered labels:** Kalam (`--font-label`, class `.hand`). Use these for labels inside diagrams, layer names and tabs.
+- All fonts are self-hosted in `assets/fonts/`.
+
+### Sketch kit (use these instead of drawing your own borders)
+- `.sk`: makes any element a hand-drawn box. Its fill and outline are drawn on a `::before` layer through the `#ce-rough` SVG filter, so text stays crisp and only the edges wobble. Set the look with custom properties, **not** `background`/`border`:
+  - `--sk-fill`
+  - `--sk-stroke`
+  - `--sk-width`
+  - `--sk-radius`
+  - `--sk-shadow`
+- `.card`, `.btn`, `.pill` and `.note` are already sketch boxes. `.note` is a sticky note, and its heading uses `.note-title`.
+- `.fill-customer` / `.fill-provider` / `.fill-shared` / `.fill-sun` set `--sk-fill` plus the matching readable text colour.
+- `.kicker.scribble` is a hand-written kicker above a headline.
+- `.hl` is a highlighter-pen underline. Use it on a **single line** only.
+- `.sk-line` (add `.dashed` for a dashed line) is a hand-drawn stroke for inline SVG paths, like arrows, braces, roofs and "the line".
+- **Doodles** come from `assets/sketch.js`. Use them as `<svg class="doodle" viewBox="…"><use href="#ce-doodle-…"/></svg>`. Copy the viewBox from the symbol:
+  - `provider`: hard hat and spanner
+  - `us`: waving person
+  - `key`
+  - `cloud`
+  - `rack`
+  - `arrow`
+
+  Characters keep a fixed meaning: **hard hat = the provider, waving person = us/the client.**
+- The slide background is whiteboard grid paper (`--grid`). `.dark` slides are the "chalkboard" statement slides.
+- Emoji are fine as quick icons. New illustrations should be inline SVG built from tokens and `.sk-line`, and should go through the rough filters so they match.
+
+### Rules
+- Don't use plain CSS borders or box-shadows for boxes on slides. Use `.sk` so everything looks hand-drawn.
+- Don't add new characters or doodles inside a deck. Add them to `assets/sketch.js` so every deck can reuse them, and document them here.
+- No copyrighted images, logos or brand marks in the repo. Refer to providers by name in text only. Client logos are only ever added at presentation time through the theme panel.
 - Respect `prefers-reduced-motion`. Animations should be decorative, never required to understand a slide.
 
 ## Git workflow (always follow)
@@ -170,6 +206,11 @@ Opening files directly (file://) mostly works, but the presenter window sync nee
 - [ ] **Theme check:** step through the deck in *Cloud Explained*, *Midnight* (dark) and *Print / mono*, plus one custom palette made by uploading a logo. All text stays readable, nothing stays the old colour, and dark slides still stand out
 - [ ] **No hard-coded colours:** `grep -nE "#[0-9a-fA-F]{3,8}\b|rgba?\(" decks/<deck-id>/` returns only `theme-exempt` lines
 - [ ] Bottom-left logo zone is clear on every slide (turn on a logo in the theme panel)
+- [ ] Boxes use `.sk` (or `.card`/`.btn`/`.note`), not plain borders. Characters and doodles come from `assets/sketch.js`
+
+## Follow-ups
+
+- **`BRAND.md` brand style guide** (planned). Covers voice and tone, the sketch style, character rules, colour usage across themes, typography scale, iconography, layout grids and do/don't examples. Once written, CLAUDE.md should point to it as the source of truth.
 
 ## Deck backlog (ideas, not in the registry)
 
