@@ -27,6 +27,7 @@ decks/<deck-id>/index.html    The deck's slides
 decks/<deck-id>/deck.css      Deck-specific styles (tokens only, see Theming)
 decks/<deck-id>/deck.js       Deck-specific interactions
 .nojekyll                     Tells Pages to serve files as-is
+.github/workflows/            deploy-main.yml (main → live site), pr-preview.yml (PR → preview URL)
 ```
 
 ## Home page
@@ -129,10 +130,19 @@ Derived tokens are set automatically. Use them, and never recompute them:
   Branch prefixes: `deck/` (new or reworked deck), `engine/` (shared engine, theming or design system), `fix/`, `docs/`, `chore/`.
 - Commit as often as you like on the branch. Those commits get squashed away.
 - Push the branch and open a pull request into `main`. Use a clear title and a short description of what changed and why. Include screenshots for visual changes, in at least the default theme and one other theme.
+- Check the PR's **preview link** (posted automatically as a comment). That's the version to demo and review.
 - Merge with **Squash and merge only**, so each PR becomes one clean commit on `main`. Use the PR title as the squash commit message, in the imperative ("Add HA vs DR deck").
 - Delete the branch after merging.
 - Don't merge until the owner has reviewed it, unless they've explicitly said to go ahead.
 - Run the quality checklist below before opening the PR.
+
+## Hosting, previews and demos
+
+- GitHub Pages serves the **`gh-pages`** branch (Settings → Pages → Deploy from a branch → `gh-pages` / root). Never edit `gh-pages` by hand. Only the workflows write to it.
+- **Live site:** `deploy-main.yml` publishes `main` to the root of `gh-pages` on every merge: https://davidjhole.github.io/cloud-explained/
+- **PR previews:** `pr-preview.yml` publishes every open PR to `https://davidjhole.github.io/cloud-explained/pr-preview/pr-<number>/` and posts the link (with a QR code) as a PR comment. The preview updates on every push and is deleted when the PR closes.
+- To demo unmerged work, push the branch, open a PR and use its preview link. Never push to `main` to demo.
+- All asset paths must be **relative** (no leading `/`), so the same files work at the site root, under `/pr-preview/pr-N/` and locally.
 
 ## Running locally
 

@@ -50,7 +50,9 @@ python3 -m http.server 8000
 
 ## Publishing
 
-Go to **Settings → Pages** and choose **Deploy from a branch**, with `main` and `/ (root)`. There's no build step.
+- Merging to `main` publishes the live site via GitHub Actions to the `gh-pages` branch. Pages is set to serve `gh-pages` / root.
+- Every pull request gets its own preview at `…/cloud-explained/pr-preview/pr-<number>/`. The link is posted on the PR.
+- There's no build step.
 
 ## Contributing a deck
 
