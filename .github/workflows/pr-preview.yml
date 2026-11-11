@@ -11,7 +11,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: gh-pages-deploy
+  group: pr-preview-${{ github.event.number }}
   cancel-in-progress: false
 
 jobs:
