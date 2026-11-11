@@ -6,14 +6,11 @@ Interactive, visual slide decks that explain core cloud architecture concepts to
 
 ## Decks
 
-| Deck | Status |
-|---|---|
-| 🔑 **Who's Holding the Keys?** The Cloud Shared Responsibility Model | ✅ Ready |
-| 🏛️ Six Pillars, One House: Well-Architected | Coming soon |
-| 🛟 Spare Tyre or Second Car? HA vs DR | Coming soon |
-| 🏗️ Build the Town Before the Houses: Landing zones | Coming soon |
-| 💸 The Meter Is Always Running: FinOps | Coming soon |
-| 🛂 Trust Nobody, Verify Everybody: Zero Trust | Coming soon |
+| Deck | Slides | Time |
+|---|---|---|
+| 🔑 **Who's Holding the Keys?** The Cloud Shared Responsibility Model | 12 | ~15 min |
+
+More topics are on the way. See the backlog in [`CLAUDE.md`](CLAUDE.md).
 
 ## Presenting
 
@@ -29,7 +26,18 @@ Interactive, visual slide decks that explain core cloud architecture concepts to
 | N | Speaker notes |
 | P | Presenter window (notes + timer, kept in sync with the main screen) |
 | O | Overview of all slides |
+| T | Theme & client colours |
 | ? | Shortcuts |
+
+### Matching a client's brand
+
+Press **T**, or click **🎨 Theme**, on the home page or in any deck:
+
+- Pick a preset, or edit any colour.
+- **Upload the client's logo.** Its colours are pulled out automatically, and you can show the logo on every slide.
+- Save the result as a named theme for next time, or copy a share link that carries it.
+
+Everything stays in your browser. Nothing is uploaded.
 
 Interactive slides (layer toggles, flip cards, the quiz) respond to clicks and taps, so you can hand the mouse to the room.
 
@@ -46,4 +54,4 @@ Go to **Settings → Pages** and choose **Deploy from a branch**, with `main` an
 
 ## Contributing a deck
 
-See [`CLAUDE.md`](CLAUDE.md) for the tone, visual language and engine contract. To start a new deck, copy `decks/_template/` and register it in `decks/registry.js`.
+See [`CLAUDE.md`](CLAUDE.md) for the tone, the theming rules every slide must follow, the engine contract and the git workflow (branch → PR → squash merge). To start a new deck, copy `decks/_template/` and register it in `decks/registry.js`.

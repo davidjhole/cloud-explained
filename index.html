@@ -6,14 +6,25 @@
   <title>Cloud, Explained · interactive decks for leadership</title>
   <meta name="description" content="Interactive, visual slide decks that explain core cloud architecture concepts to leadership and non-technical stakeholders.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+  <script src="assets/themes.js"></script>
+  <script src="assets/theme.js"></script>
   <link rel="stylesheet" href="assets/engine.css">
   <style>
-    html, body { overflow: auto; background: var(--paper); height: auto; min-height: 100%; }
+    html, body { overflow: auto; background-color: var(--paper); height: auto; min-height: 100%; }
     body {
-      background-image: radial-gradient(rgba(27,31,59,.09) 1.2px, transparent 1.2px);
+      background-image: radial-gradient(var(--dot) 1.2px, transparent 1.2px);
       background-size: 26px 26px;
+      transition: background-color .3s;
     }
-    .wrap { max-width: 1180px; margin: 0 auto; padding: 56px 24px 140px; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 24px 140px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 40px; min-height: 48px; }
+    .brand { font-family: var(--font-display); font-weight: 800; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+    .client { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+    .client .ce-client-logo { position: static; max-height: 40px; }
+    .theme-btn { font-size: 16px; padding: 10px 16px; border-radius: 12px; display: inline-flex; gap: 8px; align-items: center; }
+    .theme-btn .sw { display: inline-flex; gap: 2px; }
+    .theme-btn .sw i { width: 12px; height: 18px; border-radius: 3px; border: 1px solid rgba(var(--ink-rgb), .25); }
+
     header .kicker { font-size: 14px; }
     header h1 { font-size: clamp(48px, 8vw, 92px); }
     header h1 .cloud { display: inline-block; animation: bob 4s ease-in-out infinite; }
@@ -25,7 +36,7 @@
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 22px; }
     .deck-card {
       position: relative;
-      background: #fff;
+      background: var(--surface);
       border: 3px solid var(--ink);
       border-radius: 20px;
       box-shadow: 0 4px 0 var(--ink);
@@ -35,9 +46,8 @@
       cursor: pointer;
     }
     .deck-card:hover { transform: translateY(-3px); box-shadow: 0 7px 0 var(--ink); }
-    .deck-card.is-selected { background: #fff8de; }
-    .deck-card.is-soon { cursor: default; opacity: .6; box-shadow: none; border-style: dashed; }
-    .deck-card.is-soon:hover { transform: none; }
+    .deck-card:focus-visible { outline: 4px solid var(--sun); outline-offset: 4px; }
+    .deck-card.is-selected { background: var(--sun-soft); }
     .deck-card .icon { font-size: 44px; line-height: 1; }
     .deck-card h2 { font-size: 28px; margin: 0; }
     .deck-card .sub { font-weight: 700; color: var(--customer); font-size: 15px; margin: 0; }
@@ -49,38 +59,52 @@
     .check {
       position: absolute; top: 18px; right: 18px;
       width: 34px; height: 34px; border-radius: 10px;
-      border: 3px solid var(--ink); background: #fff;
+      border: 3px solid var(--ink); background: var(--surface);
       display: grid; place-items: center; font-weight: 800; font-size: 16px;
     }
     .is-selected .check { background: var(--ink); color: var(--sun); }
-    .soon-tag { position: absolute; top: 20px; right: 18px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .more {
+      border: 3px dashed var(--line); border-radius: 20px; padding: 24px;
+      display: flex; flex-direction: column; justify-content: center; gap: 6px;
+      color: var(--ink-soft); font-size: 15px;
+    }
+    .more b { font-family: var(--font-display); font-size: 22px; color: var(--ink); }
 
     .tray {
       position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 160%);
       transition: transform .35s var(--ease);
-      background: var(--ink); color: var(--paper);
+      background: var(--deep); color: var(--on-deep);
       border-radius: 18px; padding: 12px 12px 12px 22px;
       display: flex; gap: 16px; align-items: center;
       box-shadow: 0 10px 40px rgba(0,0,0,.25);
       max-width: calc(100vw - 24px);
     }
     .tray.is-visible { transform: translate(-50%, 0); }
-    .tray .order { font-size: 15px; color: #c9cbe0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .tray .btn { font-size: 17px; padding: 10px 18px; background: var(--sun); white-space: nowrap; }
+    .tray .order { font-size: 15px; color: var(--on-deep-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tray .btn { font-size: 17px; padding: 10px 18px; background: var(--sun); color: var(--on-sun); white-space: nowrap; }
     footer { margin-top: 56px; font-size: 14px; color: var(--ink-soft); }
     footer a { color: inherit; }
   </style>
 </head>
 <body>
   <div class="wrap">
+    <div class="topbar">
+      <div class="brand">☁️ Cloud, Explained</div>
+      <div class="client" data-logo-slot></div>
+      <button class="btn theme-btn" id="theme-btn" type="button" title="Theme & client colours (T)">
+        <span class="sw" aria-hidden="true"><i style="background:var(--customer)"></i><i style="background:var(--provider)"></i><i style="background:var(--shared)"></i><i style="background:var(--sun)"></i></span>
+        Theme
+      </button>
+    </div>
+
     <header>
       <p class="kicker">Cloud architecture, minus the jargon</p>
       <h1>Cloud, Explained <span class="cloud">☁️</span></h1>
-      <p>Short, visual, interactive decks for explaining cloud principles to leadership teams. Open one, or pick a few and present them back to back.</p>
+      <p>Short, visual, interactive decks for explaining cloud principles to leadership teams. Open one, or tick a few and present them back to back. Presenting to a client? Set their brand colours under <b>Theme</b> first.</p>
       <div class="how">
         <span class="pill">① Tick the decks you want</span>
         <span class="pill">② Hit “Present”</span>
-        <span class="pill">③ Use → / Space · F for fullscreen · P for presenter view</span>
+        <span class="pill">③ → / Space · F fullscreen · P presenter · T theme</span>
       </div>
     </header>
 
@@ -103,30 +127,32 @@
       const grid = document.getElementById("grid");
       const tray = document.getElementById("tray");
       const order = document.getElementById("order");
-      const selected = []; // keeps click order = presentation order
+      const selected = []; // click order = presentation order
 
       decks.forEach((d) => {
-        const ready = d.status === "ready";
         const card = document.createElement("article");
-        card.className = "deck-card" + (ready ? "" : " is-soon");
+        card.className = "deck-card";
         card.dataset.id = d.id;
+        card.tabIndex = 0;
+        card.setAttribute("role", "checkbox");
+        card.setAttribute("aria-checked", "false");
         card.innerHTML = `
-          ${ready ? `<span class="check" aria-hidden="true"></span>` : `<span class="soon-tag">Coming soon</span>`}
+          <span class="check" aria-hidden="true"></span>
           <div class="icon" aria-hidden="true">${d.icon}</div>
           <h2>${d.title}</h2>
           <p class="sub">${d.subtitle}</p>
           <p>${d.blurb}</p>
-          <div class="meta"><span>⏱ ~${d.minutes} min</span>${d.tags.map((t) => `<span>${t}</span>`).join("")}</div>
-          ${ready ? `<div class="actions"><a class="btn" href="${d.path}">Open deck</a></div>` : ""}`;
-        if (ready) {
-          card.tabIndex = 0;
-          card.setAttribute("role", "checkbox");
-          card.setAttribute("aria-checked", "false");
-          card.addEventListener("click", (e) => { if (!e.target.closest("a")) toggle(d.id); });
-          card.addEventListener("keydown", (e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(d.id); } });
-        }
+          <div class="meta"><span>⏱ ~${d.minutes} min</span>${d.slides ? `<span>${d.slides} slides</span>` : ""}${(d.tags || []).map((t) => `<span>${t}</span>`).join("")}</div>
+          <div class="actions"><a class="btn" href="${d.path}">Open deck</a></div>`;
+        card.addEventListener("click", (e) => { if (!e.target.closest("a")) toggle(d.id); });
+        card.addEventListener("keydown", (e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(d.id); } });
         grid.appendChild(card);
       });
+
+      const more = document.createElement("div");
+      more.className = "more";
+      more.innerHTML = `<b>More decks on the way</b>Each new topic will appear here as soon as it's ready.`;
+      grid.appendChild(more);
 
       function toggle(id) {
         const i = selected.indexOf(id);
@@ -139,8 +165,7 @@
           const pos = selected.indexOf(c.dataset.id);
           c.classList.toggle("is-selected", pos >= 0);
           c.setAttribute("aria-checked", String(pos >= 0));
-          const chk = c.querySelector(".check");
-          if (chk) chk.textContent = pos >= 0 ? pos + 1 : "";
+          c.querySelector(".check").textContent = pos >= 0 ? pos + 1 : "";
         });
         tray.classList.toggle("is-visible", selected.length > 0);
         order.textContent = selected.map((id, i) => `${i + 1}. ${decks.find((d) => d.id === id).title}`).join("  ·  ");
@@ -150,6 +175,11 @@
         if (!selected.length) return;
         const first = decks.find((d) => d.id === selected[0]);
         location.href = `${first.path}?playlist=${encodeURIComponent(selected.join(","))}`;
+      });
+
+      document.getElementById("theme-btn").addEventListener("click", () => window.CETheme.open());
+      document.addEventListener("keydown", (e) => {
+        if ((e.key === "t" || e.key === "T") && !e.target.matches("input, textarea") && !e.metaKey && !e.ctrlKey) window.CETheme.toggle();
       });
     })();
   </script>

@@ -8,6 +8,7 @@
        </div>
        <script src="../../decks/registry.js"></script>
        <script src="../../assets/engine.js"></script>
+     and in <head>: assets/themes.js then assets/theme.js
        <script src="deck.js"></script>   (optional, deck-specific interactions)
 
    Events dispatched on each <section class="slide">:
@@ -16,7 +17,9 @@
      slide:step   { index, step } — a .step was revealed/hidden (step = count shown)
 
    Keyboard: → / Space / PgDn next · ← / PgUp back · Home / End · F fullscreen
-             N notes · O overview · P presenter window · ? help · Esc close
+             N notes · O overview · P presenter window · T theme · ? help · Esc close
+
+   Colours come from assets/theme.js (load it in <head>); see CLAUDE.md.
    URL:      #/<n> deep-links to slide n (1-based)
              ?playlist=id1,id2 chains decks — the last slide offers "Up next"
    ========================================================================== */
@@ -57,6 +60,7 @@
     <span class="ce-count" aria-live="polite"></span>
     <button type="button" data-act="next" aria-label="Next">→</button>
     <button type="button" data-act="notes" title="Speaker notes (N)">Notes</button>
+    <button type="button" data-act="theme" title="Theme & client colours (T)">🎨 Theme</button>
     <button type="button" data-act="present" title="Open presenter window (P)">Presenter</button>
     <button type="button" data-act="full" title="Fullscreen (F)">⛶</button>
     <button type="button" data-act="help" title="Shortcuts (?)">?</button>`;
@@ -73,6 +77,7 @@
         <tr><td><kbd>N</kbd></td><td>Speaker notes</td></tr>
         <tr><td><kbd>P</kbd></td><td>Presenter window (stays in sync)</td></tr>
         <tr><td><kbd>O</kbd></td><td>Slide overview</td></tr>
+        <tr><td><kbd>T</kbd></td><td>Theme &amp; client colours</td></tr>
         <tr><td><kbd>Esc</kbd></td><td>Close panels</td></tr>
       </table>
     </div>`;
@@ -127,6 +132,7 @@
 
     index = newIndex;
     stepCount = newStep;
+    deckEl.classList.toggle("on-dark", slides[index].classList.contains("dark"));
     applySteps(slides[index], stepCount);
 
     if (changed) slides[index].dispatchEvent(new CustomEvent("slide:enter", { detail: { index } }));
@@ -254,6 +260,7 @@
     else if (act === "present") openPresenter();
     else if (act === "full") toggleFullscreen();
     else if (act === "help") help.classList.toggle("is-open");
+    else if (act === "theme") window.CETheme?.toggle();
   });
   help.addEventListener("click", () => help.classList.remove("is-open"));
 
@@ -275,6 +282,7 @@
       case "o": case "O": toggleOverview(); break;
       case "p": case "P": openPresenter(); break;
       case "?": help.classList.toggle("is-open"); break;
+      case "t": case "T": window.CETheme?.toggle(); break;
       case "Escape":
         help.classList.remove("is-open");
         if (document.body.classList.contains("ce-overview")) toggleOverview(false);

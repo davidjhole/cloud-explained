@@ -1,5 +1,6 @@
-/* Deck registry — the single list of decks shown on the home page and used for playlists.
-   Add a new entry here when you add a deck folder. status: "ready" | "coming-soon". */
+/* Deck registry: the single list of decks shown on the home page and used for playlists.
+   Only list decks that exist. Add an entry when a new deck folder is merged.
+   Ideas for future decks live in the backlog in CLAUDE.md, not here. */
 window.CE_DECKS = [
   {
     id: "shared-responsibility",
@@ -9,62 +10,7 @@ window.CE_DECKS = [
     path: "decks/shared-responsibility/",
     icon: "🔑",
     minutes: 15,
+    slides: 12,
     tags: ["Security", "Governance"],
-    status: "ready",
-  },
-  {
-    id: "well-architected",
-    title: "Six Pillars, One House",
-    subtitle: "Well-Architected frameworks",
-    blurb: "Reliability, security, cost, performance, operations and sustainability as the pillars of a building.",
-    path: "decks/well-architected/",
-    icon: "🏛️",
-    minutes: 15,
-    tags: ["Strategy"],
-    status: "coming-soon",
-  },
-  {
-    id: "ha-vs-dr",
-    title: "Spare Tyre or Second Car?",
-    subtitle: "High availability vs disaster recovery (RTO / RPO)",
-    blurb: "How much downtime and data loss can we stomach, and what each answer costs.",
-    path: "decks/ha-vs-dr/",
-    icon: "🛟",
-    minutes: 12,
-    tags: ["Resilience"],
-    status: "coming-soon",
-  },
-  {
-    id: "landing-zones",
-    title: "Build the Town Before the Houses",
-    subtitle: "Cloud landing zones",
-    blurb: "Roads, utilities and planning rules: the foundations every workload moves into.",
-    path: "decks/landing-zones/",
-    icon: "🏗️",
-    minutes: 12,
-    tags: ["Foundations"],
-    status: "coming-soon",
-  },
-  {
-    id: "finops",
-    title: "The Meter Is Always Running",
-    subtitle: "FinOps and cloud cost basics",
-    blurb: "Why cloud bills surprise people, and the habits that keep spend under control.",
-    path: "decks/finops/",
-    icon: "💸",
-    minutes: 12,
-    tags: ["Cost"],
-    status: "coming-soon",
-  },
-  {
-    id: "zero-trust",
-    title: "Trust Nobody, Verify Everybody",
-    subtitle: "Zero Trust in plain English",
-    blurb: "From castle-and-moat to checking every badge at every door.",
-    path: "decks/zero-trust/",
-    icon: "🛂",
-    minutes: 12,
-    tags: ["Security"],
-    status: "coming-soon",
   },
 ];
