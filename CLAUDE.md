@@ -132,6 +132,12 @@ Derived tokens are set automatically. Use them, and never recompute them:
 - Push the branch and open a pull request into `main`. Use a clear title and a short description of what changed and why. Include screenshots for visual changes, in at least the default theme and one other theme.
 - Check the PR's **preview link** (posted automatically as a comment). That's the version to demo and review.
 - Merge with **Squash and merge only**, so each PR becomes one clean commit on `main`. Use the PR title as the squash commit message, in the imperative ("Add HA vs DR deck").
+- **Commits on `main` are the PR title only, with an empty body and no trailers.**
+  - Branch commits *may* carry AI attribution trailers (`Co-Authored-By: Claude…`, `Claude-Session:…`). These must **never** reach `main`.
+  - When merging in the GitHub UI, clear the description box so only the title remains.
+  - When merging via the API, send `merge_method=squash`, `commit_title="<PR title> (#<n>)"` and an **empty** `commit_message`.
+  - The repo setting *Settings → General → Pull Requests → Allow squash merging → Default to pull request title* enforces this. Never use the "title and description" option, because PR descriptions contain attribution.
+- Commit as the owner's GitHub identity: `David Hole <44851206+davidjhole@users.noreply.github.com>`. Any other email shows up as a separate co-author.
 - Delete the branch after merging.
 - Don't merge until the owner has reviewed it, unless they've explicitly said to go ahead.
 - Run the quality checklist below before opening the PR.
