@@ -14,6 +14,10 @@
 @font-face { font-family: "Inter"; font-weight: 500; font-display: swap; src: url("fonts/inter-latin-500-normal.woff2") format("woff2"); }
 @font-face { font-family: "Inter"; font-weight: 600; font-display: swap; src: url("fonts/inter-latin-600-normal.woff2") format("woff2"); }
 @font-face { font-family: "Inter"; font-weight: 700; font-display: swap; src: url("fonts/inter-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Caveat"; font-weight: 500; font-display: swap; src: url("fonts/caveat-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Caveat"; font-weight: 700; font-display: swap; src: url("fonts/caveat-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Kalam"; font-weight: 400; font-display: swap; src: url("fonts/kalam-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Kalam"; font-weight: 700; font-display: swap; src: url("fonts/kalam-latin-700-normal.woff2") format("woff2"); }
 
 :root {
   /* ---- Theme tokens: fallbacks only. assets/theme.js overrides these. ---- */
@@ -55,10 +59,17 @@
   --on-good: #ffffff;
   --on-bad: #ffffff;
   --ink-rgb: 27, 31, 59;
+  --grid: #e9e3d8;          /* whiteboard grid lines */
+
+  /* Not themed on purpose: a natural skin tone for doodle characters. theme-exempt */
+  --skin: #ffdcc2;
+  --hair: #3a2d2a;  /* theme-exempt: natural hair colour for doodle characters */
 
   /* ---- Type, shape, motion ---- */
   --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-hand: "Caveat", "Segoe Print", "Comic Sans MS", cursive;   /* scribbled notes */
+  --font-label: "Kalam", "Segoe Print", "Comic Sans MS", cursive;   /* hand-lettered labels */
   --radius: 22px;
   --border: 3px solid var(--ink);
   --shadow: 0 2px 0 var(--ink), 0 10px 30px rgba(var(--ink-rgb), 0.08);
@@ -93,8 +104,11 @@ html, body {
   background-color: var(--paper);
   border-radius: 6px;
   overflow: hidden;
-  background-image: radial-gradient(var(--dot) 1.2px, transparent 1.2px);
-  background-size: 26px 26px;
+  /* whiteboard grid paper */
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px;
   transition: background-color 0.3s;
 }
 
@@ -153,18 +167,61 @@ p, li { font-size: 28px; line-height: 1.4; }
 .dark .lead { color: var(--on-deep-soft); }
 .small { font-size: 20px; color: var(--ink-soft); }
 
-.hl { background: linear-gradient(transparent 58%, var(--sun) 58%); padding: 0 4px; }
+/* Highlighter-pen underline (single line of text). */
+.hl { position: relative; isolation: isolate; padding: 0 4px; white-space: nowrap; }
+.hl::before {
+  content: "";
+  position: absolute;
+  left: -2px; right: -2px; bottom: 0.06em;
+  height: 0.42em;
+  background: var(--sun);
+  border-radius: 6px 14px 8px 12px;
+  transform: rotate(-1deg);
+  filter: url(#ce-rough);
+  z-index: -1;
+}
+/* Dark themes: a full-height marker block with readable text on top */
+[data-theme-scheme="dark"] .hl { color: var(--on-sun); }
+[data-theme-scheme="dark"] .hl::before { bottom: -0.04em; height: 1.04em; }
 .c-provider { color: var(--provider); }
 .c-customer { color: var(--customer); }
 .c-shared { color: var(--shared); }
 
 /* ---------- Common building blocks ---------- */
 
+/* ---------- Sketch kit: hand-drawn boxes ----------
+   Any element with .sk (and .card, .btn, .pill, .note, which are .sk by default)
+   draws its fill and border on a ::before layer that runs through the #ce-rough
+   filter (injected by assets/sketch.js). The text stays crisp, and only the edges wobble.
+   Customise with custom properties instead of background/border:
+     --sk-fill    fill (any background value, incl. gradients)   default var(--surface)
+     --sk-stroke  outline colour                                  default var(--ink)
+     --sk-width   outline width                                   default 3px
+     --sk-radius  corner shape                                    default hand-drawn
+     --sk-shadow  offset shadow                                   default none
+   .sk sets position: relative. Absolutely positioned elements can override it. */
+.sk, .card, .btn, .pill, .note {
+  position: relative;
+  isolation: isolate;
+  background: none;
+  border: 0;
+}
+.sk::before, .card::before, .btn::before, .pill::before, .note::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--sk-fill, var(--surface));
+  border: var(--sk-width, 3px) solid var(--sk-stroke, var(--ink));
+  border-radius: var(--sk-radius, 14px 22px 16px 20px / 20px 16px 22px 14px);
+  box-shadow: var(--sk-shadow, none);
+  filter: url(#ce-rough);
+  pointer-events: none;
+  transition: background 0.2s, box-shadow 0.12s var(--ease);
+}
+
 .card {
-  background: var(--surface);
-  border: var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  --sk-shadow: 5px 6px 0 rgba(var(--ink-rgb), 0.12);
   padding: 28px 30px;
 }
 
@@ -173,11 +230,9 @@ p, li { font-size: 28px; line-height: 1.4; }
   align-items: center;
   gap: 10px;
   padding: 8px 18px;
-  border-radius: 999px;
-  border: var(--border);
   font-weight: 700;
   font-size: 20px;
-  background: var(--surface);
+  --sk-radius: 999px 900px 999px 920px;
 }
 .pill .dot { width: 16px; height: 16px; border-radius: 50%; }
 
@@ -198,24 +253,54 @@ p, li { font-size: 28px; line-height: 1.4; }
   font-weight: 700;
   font-size: 24px;
   padding: 14px 28px;
-  border-radius: 14px;
-  border: var(--border);
-  background: var(--surface);
   color: var(--ink);
   cursor: pointer;
-  box-shadow: 0 4px 0 var(--ink);
-  transition: transform 0.12s var(--ease), box-shadow 0.12s var(--ease), background 0.2s;
+  --sk-shadow: 0 4px 0 var(--ink);
+  --sk-radius: 12px 18px 14px 16px / 16px 14px 18px 12px;
+  transition: transform 0.12s var(--ease);
 }
-.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--ink); }
-.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
-.btn.is-on { background: var(--ink); color: var(--on-ink); }
+.btn:hover { transform: translateY(-2px); --sk-shadow: 0 6px 0 var(--ink); }
+.btn:active { transform: translateY(3px); --sk-shadow: 0 1px 0 var(--ink); }
+.btn.is-on { --sk-fill: var(--ink); color: var(--on-ink); }
 .btn:focus-visible { outline: 4px solid var(--sun); outline-offset: 3px; }
 
+/* Sticky note */
+.note {
+  --sk-fill: var(--sun-soft);
+  --sk-radius: 4px 4px 34px 4px;
+  --sk-shadow: 6px 8px 0 rgba(var(--ink-rgb), 0.12);
+  padding: 26px 30px;
+  transform: rotate(-1.5deg);
+}
+.note .note-title { font-family: var(--font-label); font-weight: 700; font-size: 30px; margin: 0 0 6px; }
+
+/* Handwriting */
+.scribble {
+  font-family: var(--font-hand);
+  font-weight: 700;
+  color: var(--customer);
+  display: inline-block;
+  transform: rotate(-2deg);
+  line-height: 1.05;
+}
+.scribble.c-provider { color: var(--provider); }
+.scribble.c-ink { color: var(--ink); }
+.hand { font-family: var(--font-label); }
+.kicker.scribble { font-size: 40px; letter-spacing: 0; text-transform: none; font-weight: 700; margin: 0 0 18px; }
+.scribble { white-space: nowrap; }
+
+/* Hand-drawn lines and arrows in inline SVG */
+.sk-line { fill: none; stroke: var(--ink); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; filter: url(#ce-rough-soft); }
+.sk-line.dashed { stroke-dasharray: 16 12; }
+.doodle { display: block; overflow: visible; }
+
 /* Responsibility fills — use these instead of raw colours */
-.fill-customer { background: var(--customer); color: var(--on-customer); }
-.fill-provider { background: var(--provider); color: var(--on-provider); }
-.fill-shared { background: repeating-linear-gradient(-45deg, var(--shared) 0 18px, var(--shared-deep) 18px 36px); color: var(--on-shared); }
-.fill-sun { background: var(--sun); color: var(--on-sun); }
+.fill-customer { --sk-fill: var(--customer); color: var(--on-customer); }
+.fill-provider { --sk-fill: var(--provider); color: var(--on-provider); }
+.fill-shared { --sk-fill: repeating-linear-gradient(-45deg, var(--shared) 0 18px, var(--shared-deep) 18px 36px); color: var(--on-shared); }
+.fill-sun { --sk-fill: var(--sun); color: var(--on-sun); }
+.fill-customer:not(.sk, .card, .btn, .pill, .note), .fill-provider:not(.sk, .card, .btn, .pill, .note),
+.fill-shared:not(.sk, .card, .btn, .pill, .note), .fill-sun:not(.sk, .card, .btn, .pill, .note) { background: var(--sk-fill); }
 
 /* ---------- Step-by-step reveals ---------- */
 
@@ -334,6 +419,10 @@ body.ce-overview .slide {
   outline: 10px solid transparent;
 }
 body.ce-overview .slide.dark { background-color: var(--deep); }
+body.ce-overview .slide:not(.dark) {
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
 body.ce-overview .slide.is-active { outline-color: var(--sun); }
 body.ce-overview .step { opacity: 1; transform: none; }
 body.ce-overview .ce-client-logo { display: none; }
