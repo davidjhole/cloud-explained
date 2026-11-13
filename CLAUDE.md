@@ -15,6 +15,7 @@ Interactive, visual slide decks that explain cloud architecture concepts to lead
 ## Repo layout
 
 ```
+BRAND.md                      Brand style guide: voice, tone and visual style
 index.html                    Home page: lists every deck in the registry; multi-select builds a playlist
 assets/engine.css             Design system, theme token defaults, slide engine + theme panel styles
 assets/engine.js              Slide engine (navigation, steps, notes, presenter sync, overview, playlist)
@@ -59,7 +60,7 @@ decks/<deck-id>/deck.js       Deck-specific interactions
 
 ## Theming (mandatory for every page and every new slide)
 
-Presenters must be able to re-skin any deck in seconds to match a client's brand colours. So **every colour on every slide must come from a theme token.** A deck that hard-codes colours breaks client theming and won't be merged.
+Presenters must be able to re-skin any deck in seconds to match a client's brand colours. So **every colour on every slide must come from a theme token.** A deck that hard-codes colours breaks client theming and won't be merged. For how to use colour well (proportions, meaning, checking across themes), see `BRAND.md`.
 
 ### How it works
 
@@ -116,7 +117,7 @@ Deliberately *not* themed (theme-exempt): `--skin` and `--hair`, the natural ski
 
 ## Visual language: "whiteboard sketch" (house style)
 
-Every deck looks like a cloud architect sketching on a whiteboard for the board: **hand-drawn edges, scribbled notes, simple doodle characters, but clean, bold headlines and plain-English body text**, so it stays professional. This was mockup A, chosen in November 2026. A fuller brand style guide (`BRAND.md`) is planned (see Follow-ups). Until it exists, this section is the reference.
+Every deck looks like a cloud architect sketching on a whiteboard for the board: **hand-drawn edges, scribbled notes, simple doodle characters, but clean, bold headlines and plain-English body text**, so it stays professional. This was mockup A, chosen in November 2026. **`BRAND.md` is the source of truth for voice, tone and visual style** (characters, colour usage, type scale, iconography, layout, do/don't). This section is the short version; when they differ, `BRAND.md` wins.
 
 ### Type
 - **Headlines:** Bricolage Grotesque (`--font-display`), bold and clean, never hand-written.
@@ -208,10 +209,7 @@ Opening files directly (file://) mostly works, but the presenter window sync nee
 - [ ] **No hard-coded colours:** `grep -nE "#[0-9a-fA-F]{3,8}\b|rgba?\(" decks/<deck-id>/` returns only `theme-exempt` lines
 - [ ] Bottom-left logo zone is clear on every slide (turn on a logo in the theme panel)
 - [ ] Boxes use `.sk` (or `.card`/`.btn`/`.note`), not plain borders. Characters and doodles come from `assets/sketch.js`
-
-## Follow-ups
-
-- **`BRAND.md` brand style guide** (planned). Covers voice and tone, the sketch style, character rules, colour usage across themes, typography scale, iconography, layout grids and do/don't examples. Once written, CLAUDE.md should point to it as the source of truth.
+- [ ] The pre-merge brand check in `BRAND.md` passes
 
 ## Deck backlog (ideas, not in the registry)
 
