@@ -137,13 +137,14 @@ Every deck looks like a cloud architect sketching on a whiteboard for the board:
 - `.kicker.scribble` is a hand-written kicker above a headline.
 - `.hl` is a highlighter-pen underline. Use it on a **single line** only.
 - `.sk-line` (add `.dashed` for a dashed line) is a hand-drawn stroke for inline SVG paths, like arrows, braces, roofs and "the line".
-- **Doodles** come from `assets/sketch.js`. Use them as `<svg class="doodle" viewBox="…"><use href="#ce-doodle-…"/></svg>`. Copy the viewBox from the symbol:
-  - `provider`: hard hat and spanner
-  - `us`: waving person
-  - `key`
-  - `cloud`
-  - `rack`
-  - `arrow`
+- **Doodles** come from `assets/sketch.js`. Use them as `<svg class="doodle" viewBox="0 0 W H"><use href="#ce-doodle-…"/></svg>`. The outer viewBox **must start at `0 0`**, with W×H taken from the list below. Otherwise the drawing is offset inside its box:
+  - `provider` (140×150): hard hat and spanner
+  - `us` (145×165): waving person
+  - `person` (100×165): a plain team member. Set the body colour with `style="--doodle-body: var(--token)"`
+  - `key` (120×56)
+  - `cloud` (640×360)
+  - `rack` (82×132)
+  - `arrow` (120×60): coloured with `currentColor`
 
   Characters keep a fixed meaning: **hard hat = the provider, waving person = us/the client.**
 - The slide background is whiteboard grid paper (`--grid`). `.dark` slides are the "chalkboard" statement slides.
