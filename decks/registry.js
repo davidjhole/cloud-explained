@@ -13,4 +13,15 @@ window.CE_DECKS = [
     slides: 12,
     tags: ["Security", "Governance"],
   },
+  {
+    id: "ha-vs-dr",
+    title: "Staying Up, or Getting Back Up?",
+    subtitle: "High Availability vs Disaster Recovery (RTO & RPO)",
+    blurb: "Why surviving a broken server and surviving a disaster are different problems, and the two numbers that decide what each costs.",
+    path: "decks/ha-vs-dr/",
+    icon: "🛟",
+    minutes: 20,
+    slides: 13,
+    tags: ["Resilience", "Risk"],
+  },
 ];

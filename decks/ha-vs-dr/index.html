@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Staying Up, or Getting Back Up? · High Availability vs Disaster Recovery</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛟</text></svg>">
+  <script src="../../assets/themes.js"></script>
+  <script src="../../assets/theme.js"></script>
+  <link rel="stylesheet" href="../../assets/engine.css">
+  <link rel="stylesheet" href="deck.css">
+</head>
+<body data-deck="ha-vs-dr">
+<div class="deck">
+
+  <!-- 1 · Title ------------------------------------------------------------ -->
+  <section class="slide title-slide">
+    <div class="title-copy">
+      <p class="scribble title-scribble">a quick doodle-guide to…</p>
+      <h1>Staying up, or getting <span class="hl">back up?</span></h1>
+      <p class="lead">High availability, disaster recovery, and the two numbers that decide what they cost.</p>
+    </div>
+    <div class="title-scene" aria-hidden="true">
+      <svg class="doodle scene-cloud" viewBox="0 30 640 360"><use href="#ce-doodle-cloud"/></svg>
+      <div class="scene-racks">
+        <div class="scene-rack is-broken">
+          <svg class="doodle" viewBox="-6 -6 82 132"><use href="#ce-doodle-rack"/></svg>
+          <span class="scene-boom">💥</span>
+        </div>
+        <div class="scene-rack">
+          <svg class="doodle" viewBox="-6 -6 82 132"><use href="#ce-doodle-rack"/></svg>
+        </div>
+      </div>
+      <span class="scribble scene-say-1">“one falls over…”</span>
+      <span class="scribble c-provider scene-say-2">…the other carries on</span>
+      <svg class="doodle scene-arrow" viewBox="0 0 120 60"><use href="#ce-doodle-arrow"/></svg>
+      <svg class="doodle scene-us" viewBox="-90 -8 145 165"><use href="#ce-doodle-us"/></svg>
+      <span class="scribble scene-say-us">“and if they <u>both</u> go?”</span>
+    </div>
+    <aside class="notes">
+      <p>Welcome. In about 20 minutes we'll answer two questions: how do we stay up when something breaks, and how do we get back up when something big breaks?</p>
+      <p>Those are two different things with two different price tags. By the end you'll know the two numbers that decide how much we should spend on each.</p>
+    </aside>
+  </section>
+
+  <!-- 2 · Everything fails ------------------------------------------------- -->
+  <section class="slide center">
+    <p class="scribble q-scribble">the question nobody likes asking out loud…</p>
+    <h2 class="big-q">“It's in the cloud, so it can't go down… <span class="hl">right?</span>”</h2>
+    <div class="answer-row">
+      <div class="step"><span class="scribble answer-word">It can.</span></div>
+      <blockquote class="quote card step">
+        <p class="quote-text">“Everything fails, all the time.”</p>
+        <p class="quote-who">Werner Vogels, Chief Technology Officer, Amazon</p>
+      </blockquote>
+    </div>
+    <p class="lead step">The cloud doesn't stop things breaking. It gives us better tools to <b>survive</b> it, if we choose to use them.</p>
+    <aside class="notes">
+      <p>Let the room answer first. Most people assume the big providers simply don't go down.</p>
+      <p>The quote is from Werner Vogels, Amazon's CTO, who has said it in talks for years (for example in his 2016 post "10 Lessons from 10 Years of Amazon Web Services" on his All Things Distributed blog). If the people running one of the biggest clouds plan for failure, so should we.</p>
+      <p>Disks die, power fails, people make mistakes, software has bugs. The question isn't "if", it's "what happens next".</p>
+    </aside>
+  </section>
+
+  <!-- 3 · Two different questions ----------------------------------------- -->
+  <section class="slide two-q-slide">
+    <p class="kicker scribble">two ideas that get mixed up all the time</p>
+    <h2>Two different questions</h2>
+    <div class="two-q">
+      <div class="q-half card step">
+        <div class="q-icon">🛩️</div>
+        <p class="q-tag hand">High availability · HA</p>
+        <h3>“How do we <span class="hl">stay up?</span>”</h3>
+        <p>Like a plane with two engines. Lose one and it keeps flying. Passengers barely notice.</p>
+        <p class="scribble q-foot">automatic · seconds</p>
+      </div>
+      <div class="q-half card step">
+        <div class="q-icon">🛟</div>
+        <p class="q-tag hand">Disaster recovery · DR</p>
+        <h3>“How do we <span class="hl">get back up?</span>”</h3>
+        <p>Like lifeboats and a rehearsed drill. The ship is in trouble, but everyone gets to safety and carries on.</p>
+        <p class="scribble q-foot">a plan · minutes to days</p>
+      </div>
+    </div>
+    <p class="punch step">We need <span class="hl">both</span>. They protect us from different things.</p>
+    <aside class="notes">
+      <p>HA (high availability) is about absorbing everyday failures without anyone noticing: a server dies, its twin takes over.</p>
+      <p>DR (disaster recovery) is about the big, rare event: a whole site is lost, or our data is damaged. It's a plan, people and rehearsals, not just technology. Backups are one part of DR.</p>
+      <p>Ask the room: which one do you think we spend more on today?</p>
+    </aside>
+  </section>
+
+  <!-- 4 · Blast radius (interactive) -------------------------------------- -->
+  <section class="slide blast-slide">
+    <div class="blast-left">
+      <p class="kicker scribble">pick a disaster ↓</p>
+      <h2>How big is the bang?</h2>
+      <div class="blast-tabs" role="tablist" aria-label="Size of failure">
+        <button class="btn" role="tab" data-blast="0" type="button">A server</button>
+        <button class="btn" role="tab" data-blast="1" type="button">A datacentre</button>
+        <button class="btn" role="tab" data-blast="2" type="button">A region</button>
+        <button class="btn" role="tab" data-blast="3" type="button">Our data</button>
+      </div>
+      <div class="blast-desc note">
+        <p class="note-title" id="blast-name"></p>
+        <p class="blast-text" id="blast-text"></p>
+      </div>
+      <div class="verdicts">
+        <div class="verdict sk" id="v-ha"><span class="v-name">HA</span><span class="v-says" id="v-ha-says"></span></div>
+        <div class="verdict sk" id="v-dr"><span class="v-name">DR</span><span class="v-says" id="v-dr-says"></span></div>
+      </div>
+      <span class="step blast-step" aria-hidden="true"></span>
+      <span class="step blast-step" aria-hidden="true"></span>
+      <span class="step blast-step" aria-hidden="true"></span>
+    </div>
+    <div class="map" id="blast-map" data-state="0" aria-label="Diagram of servers, datacentres and regions">
+      <div class="region region-a sk">
+        <p class="region-label hand">Region 1 <span>a city's worth of datacentres</span></p>
+        <div class="zones">
+          <div class="zone zone-1 sk">
+            <p class="zone-label hand">Datacentre A</p>
+            <div class="servers">
+              <div class="server s-main"><svg class="doodle" viewBox="-6 -6 82 132"><use href="#ce-doodle-rack"/></svg><span class="app-chip sk fill-customer">our app</span><span class="boom">💥</span></div>
+              <div class="server"><svg class="doodle" viewBox="-6 -6 82 132"><use href="#ce-doodle-rack"/></svg></div>
+            </div>
+            <span class="boom zone-boom">💥</span>
+          </div>
+          <div class="zone zone-2 sk">
+            <p class="zone-label hand">Datacentre B</p>
+            <div class="servers">
+              <div class="server s-twin"><svg class="doodle" viewBox="-6 -6 82 132"><use href="#ce-doodle-rack"/></svg><span class="app-chip sk fill-customer">our app</span></div>
+              <div class="server"><svg class="doodle" viewBox="-6 -6 82 132"><use href="#ce-doodle-rack"/></svg></div>
+            </div>
+          </div>
+          <div class="zone zone-3 sk">
+            <p class="zone-label hand">Datacentre C</p>
+            <div class="servers">
+              <div class="server"><svg class="doodle" viewBox="-6 -6 82 132"><use href="#ce-doodle-rack"/></svg></div>
+              <div class="server"><svg class="doodle" viewBox="-6 -6 82 132"><use href="#ce-doodle-rack"/></svg></div>
+            </div>
+          </div>
+        </div>
+        <span class="boom region-boom">💥</span>
+        <span class="lock-note scribble">ransomware copied to both, instantly 🔒</span>
+      </div>
+      <div class="map-bottom">
+        <div class="region region-b sk">
+          <p class="region-label hand">Region 2 <span>hundreds of miles away</span></p>
+          <span class="app-chip sk standby">standby copy</span>
+        </div>
+        <div class="vault sk">
+          <span class="vault-icon">🗄️</span>
+          <p class="hand">Backups<br><span>from last night</span></p>
+        </div>
+        <svg class="doodle map-provider" viewBox="-50 -22 140 150" aria-hidden="true"><use href="#ce-doodle-provider"/></svg>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>Press → to step through the four failures, or click the buttons.</p>
+      <p>The provider (hard hat) builds the datacentres and regions. We decide where to put our copies. That's our design choice, and our responsibility.</p>
+      <p>1) A server dies: our twin copy in another datacentre takes over. That's HA. 2) A whole datacentre goes dark: still fine, because we spread across two. 3) A whole region goes down: HA can't help, because both copies were in that region. Now we need DR: switch to a copy in another region. 4) Ransomware or someone deletes data by mistake: HA faithfully copies the damage to every copy in seconds. Only a backup from before the damage saves us.</p>
+      <p>"Region" and "availability zone" are the terms AWS, Azure and Google Cloud all use. A zone is one or more datacentres with separate power and networking.</p>
+    </aside>
+  </section>
+
+  <!-- 5 · The nines (interactive) ----------------------------------------- -->
+  <section class="slide nines-slide">
+    <p class="kicker scribble">"we want 99.9% uptime!" — but what does that mean?</p>
+    <h2>Every extra nine costs more</h2>
+    <div class="nines-row">
+      <div class="nines-pick">
+        <div class="nines-tabs" role="tablist" aria-label="Availability target">
+          <button class="btn" role="tab" data-nines="0" type="button">99%</button>
+          <button class="btn" role="tab" data-nines="1" type="button">99.9%</button>
+          <button class="btn" role="tab" data-nines="2" type="button">99.99%</button>
+          <button class="btn" role="tab" data-nines="3" type="button">99.999%</button>
+        </div>
+        <div class="downtime card">
+          <p class="dt-label">We could be down for up to…</p>
+          <div class="dt-grid">
+            <div><b id="dt-year"></b><span>a year</span></div>
+            <div><b id="dt-month"></b><span>a month</span></div>
+            <div><b id="dt-week"></b><span>a week</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="nines-takes note">
+        <p class="note-title">What it usually takes</p>
+        <p class="takes-text" id="takes-text"></p>
+        <div class="cost-row"><span>Cost</span><span class="cost-meter" id="takes-cost" aria-live="polite"></span></div>
+      </div>
+    </div>
+    <span class="step nines-step" aria-hidden="true"></span>
+    <span class="step nines-step" aria-hidden="true"></span>
+    <span class="step nines-step" aria-hidden="true"></span>
+    <p class="callout small step"><b>Real example:</b> Microsoft Azure commits to 99.9% for a single virtual machine, and 99.99% when we run copies across two or more availability zones.</p>
+    <aside class="notes">
+      <p>Press → (or click) to move from 99% to 99.999% ("five nines"). The downtime figures are simple arithmetic on 365.25 days a year.</p>
+      <p>The jump from 99.9% to 99.99% means going from almost nine hours a year to under an hour. That usually means running everything twice in different datacentres. Five nines usually means multiple regions and a lot of automation. The "what it takes" and the cost meter are illustrative rules of thumb, not quotes.</p>
+      <p>The Azure figures come from Microsoft's published SLA (service level agreement) for Virtual Machines. AWS and Google Cloud publish similar tiers. Remember, an SLA is a refund promise, not a guarantee the system stays up.</p>
+      <p>Then the last step reveals the real example. After that, → moves on.</p>
+    </aside>
+  </section>
+
+  <!-- 6 · Two numbers ----------------------------------------------------- -->
+  <section class="slide numbers-slide">
+    <p class="kicker scribble">when the worst does happen…</p>
+    <h2>Two numbers run the show</h2>
+    <div class="numbers-grid">
+      <div class="num-card card step">
+        <div class="num-big">RPO</div>
+        <p class="num-full">Recovery Point Objective</p>
+        <h3>How much <span class="hl">data</span> can we afford to lose?</h3>
+        <p class="num-analogy"><span class="num-emoji">💾</span><span>“When did we last press <b>save</b>?”</span></p>
+        <p class="small">Measured in time. An RPO of 1 hour means we could lose the last hour of orders, emails or edits.</p>
+      </div>
+      <div class="num-card card step">
+        <div class="num-big">RTO</div>
+        <p class="num-full">Recovery Time Objective</p>
+        <h3>How long can we afford to be <span class="hl">down</span>?</h3>
+        <p class="num-analogy"><span class="num-emoji">⏱️</span><span>“How long until we can <b>type</b> again?”</span></p>
+        <p class="small">An RTO of 4 hours means the system must be back, working, within 4 hours of the disaster.</p>
+      </div>
+    </div>
+    <p class="punch step">These are <span class="hl">business decisions.</span> IT's job is to price them.</p>
+    <aside class="notes">
+      <p>The document analogy works well: RPO is how much typing you lose since your last save. RTO is how long until your laptop works again.</p>
+      <p>Ask the room: for our main customer system, what would you say? Most people say "zero and zero". The next slide shows why that answer is expensive.</p>
+      <p>The key message: the business sets these numbers, based on what downtime and lost data actually cost us. IT designs to hit them.</p>
+    </aside>
+  </section>
+
+  <!-- 7 · Timeline sliders (interactive) ---------------------------------- -->
+  <section class="slide timeline-slide">
+    <p class="kicker scribble">try it: drag the sliders</p>
+    <h2>Pick our numbers, see the bill</h2>
+    <div class="timeline" aria-hidden="true">
+      <div class="tl-seg tl-rpo sk" id="tl-rpo"><span class="hand">data lost</span></div>
+      <div class="tl-boom"><span>💥</span><b class="hand">disaster</b></div>
+      <div class="tl-seg tl-rto sk" id="tl-rto"><span class="hand">offline</span></div>
+      <div class="tl-end"><span>✅</span><b class="hand">back in business</b></div>
+      <div class="tl-start"><span>💾</span><b class="hand">last good copy</b></div>
+    </div>
+    <div class="sliders">
+      <label class="slider card">
+        <span class="sl-head"><b>RPO</b> · data we could lose <output id="rpo-out"></output></span>
+        <input type="range" id="rpo" min="0" max="4" step="1" value="3">
+        <span class="sl-ticks"><i>zero</i><i>5 min</i><i>1 hour</i><i>1 day</i><i>1 week</i></span>
+      </label>
+      <label class="slider card">
+        <span class="sl-head"><b>RTO</b> · time we could be down <output id="rto-out"></output></span>
+        <input type="range" id="rto" min="0" max="4" step="1" value="3">
+        <span class="sl-ticks"><i>seconds</i><i>15 min</i><i>4 hours</i><i>1 day</i><i>1 week</i></span>
+      </label>
+    </div>
+    <div class="verdict-bar note">
+      <p class="vb-text"><span class="hand">That needs:</span> <b id="tl-strategy"></b><br><span id="tl-why"></span></p>
+      <span class="cost-meter big" id="tl-cost" aria-live="polite"></span>
+    </div>
+    <aside class="notes">
+      <p>Let someone from the room drive the sliders. Start at "1 day / 1 day" (cheap), then drag both to zero and watch the cost meter.</p>
+      <p>The strictest of the two numbers decides the approach. The strategies are the four standard patterns on the next slide. The mapping and cost meter are illustrative, roughly following the guidance in the AWS whitepaper "Disaster Recovery of Workloads on AWS". Real costs depend on the system.</p>
+    </aside>
+  </section>
+
+  <!-- 8 · Four strategies ------------------------------------------------- -->
+  <section class="slide ladder-slide">
+    <p class="kicker scribble">from cheap and slow to fast and pricey</p>
+    <h2>Four ways to get back up</h2>
+    <div class="ladder">
+      <div class="rung card step">
+        <div class="rung-icon">🗄️</div>
+        <h3>Backup &amp; restore</h3>
+        <p class="scribble rung-like">like flat-pack furniture</p>
+        <p>Copies are kept safe. We rebuild when needed.</p>
+        <dl><dt>Back in</dt><dd>hours to days</dd><dt>Cost</dt><dd class="cost-meter" data-cost="1"></dd></dl>
+      </div>
+      <div class="rung card step">
+        <div class="rung-icon">🔥</div>
+        <h3>Pilot light</h3>
+        <p class="scribble rung-like">like a boiler's pilot light</p>
+        <p>Data is copied constantly. Servers sit switched off, ready to light up.</p>
+        <dl><dt>Back in</dt><dd>tens of minutes</dd><dt>Cost</dt><dd class="cost-meter" data-cost="2"></dd></dl>
+      </div>
+      <div class="rung card step">
+        <div class="rung-icon">🎭</div>
+        <h3>Warm standby</h3>
+        <p class="scribble rung-like">like an understudy in costume</p>
+        <p>A smaller copy runs all the time, ready to scale up and take over.</p>
+        <dl><dt>Back in</dt><dd>minutes</dd><dt>Cost</dt><dd class="cost-meter" data-cost="3"></dd></dl>
+      </div>
+      <div class="rung card step">
+        <div class="rung-icon">👯</div>
+        <h3>Active / active</h3>
+        <p class="scribble rung-like">like two kitchens, both cooking</p>
+        <p>Two full copies in two regions, both serving customers.</p>
+        <dl><dt>Back in</dt><dd>almost instantly</dd><dt>Cost</dt><dd class="cost-meter" data-cost="4"></dd></dl>
+      </div>
+    </div>
+    <p class="punch step">Same building blocks, different price tags. <span class="hl">Choose per system.</span></p>
+    <aside class="notes">
+      <p>These four patterns are described in the AWS whitepaper "Disaster Recovery of Workloads on AWS: Recovery in the Cloud". Azure and Google Cloud describe the same ideas with slightly different names. "Active/active" is also called "multi-site".</p>
+      <p>The analogies: flat-pack means everything's in the box but you have to build it. A pilot light is the tiny flame that's always on so the boiler can fire up fast. An understudy is dressed and waiting in the wings. Two kitchens means if one catches fire, diners barely notice.</p>
+      <p>The "back in" times are typical ranges, not promises. The cost meter is illustrative.</p>
+    </aside>
+  </section>
+
+  <!-- 9 · Tiering (interactive) ------------------------------------------- -->
+  <section class="slide tier-slide">
+    <div class="tier-top">
+      <div>
+        <p class="kicker scribble">click a system to change its tier</p>
+        <h2>Not everything needs gold</h2>
+      </div>
+      <div class="bill card">
+        <span>Monthly DR bill</span>
+        <div class="bill-bar"><i id="bill-fill"></i></div>
+        <b id="bill-text"></b>
+      </div>
+    </div>
+    <div class="tier-grid" id="tier-grid"></div>
+    <div class="tier-key">
+      <span class="pill">🥇 Gold · back in minutes, lose almost nothing</span>
+      <span class="pill">🥈 Silver · back in hours, lose up to an hour</span>
+      <span class="pill">🥉 Bronze · back in a day or so, lose up to a day</span>
+    </div>
+    <aside class="notes">
+      <p>Everything starts on Gold, so the bill is maxed out. Ask the room: which of these could survive a day offline? Click to downgrade them and watch the bill fall.</p>
+      <p>The systems are generic, illustrative examples, and so is the bill. Our own list would come from a business impact analysis: what does an hour of downtime cost, in money, reputation or regulatory terms?</p>
+      <p>Most organisations end up with a handful of Gold systems and a long tail of Bronze. That's normal and sensible.</p>
+    </aside>
+  </section>
+
+  <!-- 10 · Myths ---------------------------------------------------------- -->
+  <section class="slide myths-slide">
+    <p class="kicker scribble">tap a card to flip it</p>
+    <h2>Myth busting 💥</h2>
+    <div class="myth-grid">
+      <button class="myth" type="button">
+        <span class="myth-front sk"><span class="myth-label">Myth</span>“We have high availability, so we don't need backups.”</span>
+        <span class="myth-back sk"><span class="myth-label">Reality</span><span>HA copies <b>everything</b> to every copy in seconds, including deletions and ransomware. Backups are our undo button.</span></span>
+      </button>
+      <button class="myth" type="button">
+        <span class="myth-front sk"><span class="myth-label">Myth</span>“We take backups, so we have a DR plan.”</span>
+        <span class="myth-back sk"><span class="myth-label">Reality</span><span>A backup is a spare part. A DR plan says <b>who</b> restores <b>what</b>, in what order, how fast, and it's been tried.</span></span>
+      </button>
+      <button class="myth" type="button">
+        <span class="myth-front sk"><span class="myth-label">Myth</span>“Our cloud provider does disaster recovery for us.”</span>
+        <span class="myth-back sk"><span class="myth-label">Reality</span><span>They give us zones, regions and backup tools. <b>Designing</b> across them, and testing it, is ours.</span></span>
+      </button>
+      <button class="myth" type="button">
+        <span class="myth-front sk"><span class="myth-label">Myth</span>“Everything's critical, so make everything instant.”</span>
+        <span class="myth-back sk"><span class="myth-label">Reality</span><span>Near-instant recovery means paying to run things <b>twice</b>. Save it for the systems that truly need it.</span></span>
+      </button>
+    </div>
+    <aside class="notes">
+      <p>Ask for a show of hands, "true or false?", before flipping each card. The first one surprises people most.</p>
+      <p>The provider point links back to shared responsibility: the provider keeps its datacentres and regions running. Whether our system survives losing one is down to how we designed it.</p>
+    </aside>
+  </section>
+
+  <!-- 11 · Quiz ----------------------------------------------------------- -->
+  <section class="slide quiz-slide">
+    <div class="quiz-top">
+      <div>
+        <p class="kicker scribble">quiz time</p>
+        <h2>What saves us? 🕵️</h2>
+      </div>
+      <div class="quiz-score card"><span>Score</span><b id="q-score">0 / 0</b></div>
+    </div>
+    <div class="quiz-card card" id="quiz-card">
+      <div class="q-meta"><span id="q-num">Scenario 1 of 6</span></div>
+      <p class="q-text" id="q-text"></p>
+      <div class="q-options">
+        <button class="btn q-opt" data-answer="ha" type="button">🛩️ High availability</button>
+        <button class="btn q-opt" data-answer="dr" type="button">🛟 Failover to another region</button>
+        <button class="btn q-opt" data-answer="backup" type="button">🗄️ A backup</button>
+      </div>
+      <div class="q-reveal" id="q-reveal" hidden>
+        <p class="q-verdict scribble" id="q-verdict"></p>
+        <p class="q-why" id="q-why"></p>
+        <button class="btn q-next" id="q-next" type="button">Next scenario →</button>
+      </div>
+    </div>
+    <div class="quiz-done card" id="quiz-done" hidden>
+      <div class="qd-emoji" id="qd-emoji">🏆</div>
+      <h3 id="qd-title"></h3>
+      <p id="qd-text"></p>
+      <button class="btn" id="q-restart" type="button">Play again ↺</button>
+    </div>
+    <aside class="notes">
+      <p>Read each scenario out and get the room to shout an answer before you click.</p>
+      <p>Failover to another region is the DR answer. Backups are part of DR too, but they're the only thing that helps when the data itself is damaged.</p>
+    </aside>
+  </section>
+
+  <!-- 12 · Questions for leadership -------------------------------------- -->
+  <section class="slide ask-slide">
+    <p class="kicker scribble">take these back to your teams</p>
+    <h2>Six questions worth asking on Monday</h2>
+    <ol class="ask-list">
+      <li class="sk step"><button type="button" class="tick sk" aria-label="Mark as asked"></button><span>Do our key systems have an <b>agreed RTO and RPO</b>, signed off by the business?</span></li>
+      <li class="sk step"><button type="button" class="tick sk" aria-label="Mark as asked"></button><span>Does what we <b>pay for</b> actually match those numbers?</span></li>
+      <li class="sk step"><button type="button" class="tick sk" aria-label="Mark as asked"></button><span>When did we last <b>test a recovery</b>, end to end, and how long did it take?</span></li>
+      <li class="sk step"><button type="button" class="tick sk" aria-label="Mark as asked"></button><span>Is at least one backup <b>safe from ransomware</b>, so it can't be changed or deleted?</span></li>
+      <li class="sk step"><button type="button" class="tick sk" aria-label="Mark as asked"></button><span>Are our critical systems spread across <b>more than one datacentre</b>?</span></li>
+      <li class="sk step"><button type="button" class="tick sk" aria-label="Mark as asked"></button><span>Who <b>declares a disaster</b>, and how do we reach people if email is down?</span></li>
+    </ol>
+    <aside class="notes">
+      <p>None of these need technical knowledge to ask. If a team can't answer one confidently, that's useful information.</p>
+      <p>A plan that hasn't been tested is a hope. Tests can start small: a "tabletop" walk-through in a meeting room, then restoring one system, then a full failover.</p>
+      <p>Backups that "can't be changed or deleted" are often called immutable backups. All three big providers offer them.</p>
+    </aside>
+  </section>
+
+  <!-- 13 · Close ---------------------------------------------------------- -->
+  <section class="slide dark center close-slide">
+    <div class="close-split">
+      <div class="close-half sk">
+        <div class="close-icon">🛩️</div>
+        <p class="close-tag hand">High availability</p>
+        <p class="close-big">keeps us <b>up</b></p>
+      </div>
+      <div class="close-half sk">
+        <div class="close-icon">🛟</div>
+        <p class="close-tag hand">Disaster recovery</p>
+        <p class="close-big">gets us <b>back up</b></p>
+      </div>
+    </div>
+    <p class="scribble close-line step">Pick our two numbers before a disaster picks them for us.</p>
+    <aside class="notes">
+      <p>Close on the one-liner. Offer to run a short tiering workshop with each business area: list the systems, agree the RTO and RPO, then check what we're actually paying for.</p>
+    </aside>
+  </section>
+
+</div>
+
+<script src="../../assets/sketch.js"></script>
+<script src="../../decks/registry.js"></script>
+<script src="../../assets/engine.js"></script>
+<script src="deck.js"></script>
+</body>
+</html>
