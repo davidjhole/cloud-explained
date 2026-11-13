@@ -88,6 +88,7 @@
       "paper-2": mix(t.paper, t.ink, 0.06),
       line: mix(t.paper, t.ink, 0.18),
       dot: mix(t.paper, t.ink, isDark ? 0.14 : 0.1),
+      grid: mix(t.paper, t.ink, isDark ? 0.09 : 0.06),
       "ink-soft": mix(t.ink, t.paper, 0.3),
       "ink-faint": mix(t.ink, t.paper, 0.5),
       // .dark "statement" slides: ink background in light themes, an extra-deep
