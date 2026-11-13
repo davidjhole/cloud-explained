@@ -121,112 +121,138 @@
     m.addEventListener("click", () => m.classList.toggle("is-flipped"))
   );
 
-  /* ---------- Slide 9 · Quiz ---------- */
-  const SCENARIOS = [
-    {
-      model: "IaaS / PaaS",
-      text: "A storage bucket holding customer records is left open to the whole internet.",
-      answer: "us",
-      why: "The provider gave us the lock. Leaving it open was a configuration choice. This is one of the most common cloud breaches there is.",
+  /* ---------- Quizzes (one config per <section data-quiz="…">) ---------- */
+  const QUIZZES = {
+    provider: {
+      labels: { provider: "the provider", us: "us", both: "both of us" },
+      summary: (sc) => {
+        const ours = sc.filter((s) => s.answer !== "provider").length;
+        const theirs = sc.length - ours;
+        return `In ${ours} of the ${sc.length} scenarios, we were on the hook. The provider was solely to blame only ${theirs === 2 ? "twice" : theirs + " times"}.`;
+      },
+      scenarios: [
+        { model: "IaaS / PaaS", answer: "us",
+          text: "A storage bucket holding customer records is left open to the whole internet.",
+          why: "The provider gave us the lock. Leaving it open was a configuration choice. This is one of the most common cloud breaches there is." },
+        { model: "Any", answer: "both",
+          text: "A flood takes out one of the provider's data centres. Our main system is down for a whole day.",
+          why: "The building is theirs. Running everything in that one location, with no failover, was our design decision." },
+        { model: "SaaS", answer: "us",
+          text: "Someone who left three months ago logs into our CRM and downloads the full customer list.",
+          why: "Accounts and access are always ours. Leavers should be switched off on day one." },
+        { model: "IaaS", answer: "provider",
+          text: "A flaw in the provider's virtualisation software lets another customer peek at our servers.",
+          why: "The hypervisor and the physical hosts sit firmly on the provider's side of the line." },
+        { model: "IaaS", answer: "us",
+          text: "Ransomware gets into one of our virtual servers that hasn't been patched for a year.",
+          why: "With IaaS, the operating system is ours to patch. The provider never touches it." },
+        { model: "PaaS", answer: "provider",
+          text: "The database engine in our managed database service needs an urgent security patch.",
+          why: "With PaaS, the provider patches the platform. We still decide who can query the data and how it's configured." },
+      ],
     },
-    {
-      model: "Any",
-      text: "A flood takes out one of the provider's data centres. Our main system is down for a whole day.",
-      answer: "both",
-      why: "The building is theirs. Running everything in that one location, with no failover, was our design decision.",
+    team: {
+      labels: { coe: "the Cloud CoE", cpe: "Platform Engineering", app: "the app team" },
+      summary: (sc) => {
+        const app = sc.filter((s) => s.answer === "app").length;
+        return `The app team owned ${app} of the ${sc.length}. The CoE sets the rules and runs the front door, Platform Engineering builds the platform, and app teams own what runs on it.`;
+      },
+      scenarios: [
+        { model: "Network", answer: "cpe",
+          text: "A new app needs a firewall rule opened so a partner can connect.",
+          why: "Firewalls are a platform construct. Raise it in ServiceNow; the CoE routes it, and Platform Engineering makes the change." },
+        { model: "Maintenance", answer: "app",
+          text: "A critical security update is out for the operating system on an app's servers.",
+          why: "Update management belongs to the app team. The CoE and CPE will flag it in their compliance reports, but applying it is the app team's job." },
+        { model: "Governance", answer: "coe",
+          text: "We need to change who can approve production changes.",
+          why: "The CoE owns the change process and operational policy." },
+        { model: "Onboarding", answer: "coe",
+          text: "A team wants to move their app to the cloud but has never used Infrastructure as Code.",
+          why: "They still follow tenant onboarding, and the CoE helps them build the IaC and DevOps capability they need." },
+        { model: "Maintenance", answer: "app",
+          text: "Backups for an app's database have been failing for a week.",
+          why: "Backup is the app team's responsibility. The CoE and CPE advise and report, so this should show up in their compliance reports." },
+        { model: "Network", answer: "cpe",
+          text: "An app needs a connection back to the on-premises datacentre.",
+          why: "Connectivity is a platform construct, so it's provisioned by the Platform Engineering team for that cloud, via a request to the CoE." },
+      ],
     },
-    {
-      model: "SaaS",
-      text: "Someone who left three months ago logs into our CRM and downloads the full customer list.",
-      answer: "us",
-      why: "Accounts and access are always ours. Leavers should be switched off on day one.",
-    },
-    {
-      model: "IaaS",
-      text: "A flaw in the provider's virtualisation software lets another customer peek at our servers.",
-      answer: "provider",
-      why: "The hypervisor and the physical hosts sit firmly on the provider's side of the line.",
-    },
-    {
-      model: "IaaS",
-      text: "Ransomware gets into one of our virtual servers that hasn't been patched for a year.",
-      answer: "us",
-      why: "With IaaS, the operating system is ours to patch. The provider never touches it.",
-    },
-    {
-      model: "PaaS",
-      text: "The database engine in our managed database service needs an urgent security patch.",
-      answer: "provider",
-      why: "With PaaS, the provider patches the platform. We still decide who can query the data and how it's configured.",
-    },
-  ];
-  const LABEL = { provider: "The provider", us: "Us", both: "Both of us" };
-
-  const q = {
-    card: document.getElementById("quiz-card"),
-    done: document.getElementById("quiz-done"),
-    num: document.getElementById("q-num"),
-    model: document.getElementById("q-model"),
-    text: document.getElementById("q-text"),
-    opts: Array.from(document.querySelectorAll(".q-opt")),
-    reveal: document.getElementById("q-reveal"),
-    verdict: document.getElementById("q-verdict"),
-    why: document.getElementById("q-why"),
-    next: document.getElementById("q-next"),
-    score: document.getElementById("q-score"),
   };
-  let qi = 0, right = 0, answered = 0;
 
-  function renderQuestion() {
-    const s = SCENARIOS[qi];
-    q.card.hidden = false;
-    q.done.hidden = true;
-    q.num.textContent = `Scenario ${qi + 1} of ${SCENARIOS.length}`;
-    q.model.textContent = s.model;
-    q.text.textContent = s.text;
-    q.reveal.hidden = true;
-    q.opts.forEach((b) => { b.disabled = false; b.classList.remove("correct", "wrong"); });
-    q.score.textContent = `${right} / ${answered}`;
-  }
+  document.querySelectorAll("[data-quiz]").forEach((slide) => {
+    const cfg = QUIZZES[slide.dataset.quiz];
+    if (!cfg) return;
+    const sc = cfg.scenarios;
+    const $ = (sel) => slide.querySelector(sel);
+    const q = {
+      card: $(".quiz-card"), done: $(".quiz-done"),
+      num: $(".q-num"), model: $(".q-model"), text: $(".q-text"),
+      opts: Array.from(slide.querySelectorAll(".q-opt")),
+      reveal: $(".q-reveal"), verdict: $(".q-verdict"), why: $(".q-why"),
+      next: $(".q-next"), score: $(".q-score"),
+    };
+    let qi = 0, right = 0, answered = 0;
 
-  q.opts.forEach((b) =>
-    b.addEventListener("click", () => {
-      const s = SCENARIOS[qi];
-      const picked = b.dataset.answer;
-      const ok = picked === s.answer;
-      answered++;
-      if (ok) right++;
-      q.opts.forEach((o) => {
-        o.disabled = true;
-        if (o.dataset.answer === s.answer) o.classList.add("correct");
-        else if (o === b) o.classList.add("wrong");
-      });
-      q.verdict.textContent = ok ? "✅ Spot on!" : `❌ It's ${LABEL[s.answer].toLowerCase()}`;
-      q.why.textContent = s.why;
-      q.next.textContent = qi === SCENARIOS.length - 1 ? "See results →" : "Next scenario →";
-      q.reveal.hidden = false;
+    function render() {
+      const s = sc[qi];
+      q.card.hidden = false;
+      q.done.hidden = true;
+      q.num.textContent = `Scenario ${qi + 1} of ${sc.length}`;
+      q.model.textContent = s.model;
+      q.text.textContent = s.text;
+      q.reveal.hidden = true;
+      q.opts.forEach((b) => { b.disabled = false; b.classList.remove("correct", "wrong"); });
       q.score.textContent = `${right} / ${answered}`;
-      q.next.focus({ preventScroll: true });
-    })
-  );
+    }
 
-  q.next.addEventListener("click", () => {
-    if (qi < SCENARIOS.length - 1) { qi++; renderQuestion(); return; }
-    q.card.hidden = true;
-    q.done.hidden = false;
-    const usCount = SCENARIOS.filter((s) => s.answer !== "provider").length;
-    const pct = right / SCENARIOS.length;
-    document.getElementById("qd-emoji").textContent = pct === 1 ? "🏆" : pct >= 0.6 ? "🎉" : "🤔";
-    document.getElementById("qd-title").textContent = `${right} out of ${SCENARIOS.length}`;
-    document.getElementById("qd-text").textContent =
-      `In ${usCount} of the ${SCENARIOS.length} scenarios, we were on the hook. The provider was solely to blame only twice.`;
+    q.opts.forEach((b) =>
+      b.addEventListener("click", () => {
+        const s = sc[qi];
+        const ok = b.dataset.answer === s.answer;
+        answered++;
+        if (ok) right++;
+        q.opts.forEach((o) => {
+          o.disabled = true;
+          if (o.dataset.answer === s.answer) o.classList.add("correct");
+          else if (o === b) o.classList.add("wrong");
+        });
+        q.verdict.textContent = ok ? "✅ Spot on!" : `❌ It's ${cfg.labels[s.answer]}`;
+        q.why.textContent = s.why;
+        q.next.textContent = qi === sc.length - 1 ? "See results →" : "Next scenario →";
+        q.reveal.hidden = false;
+        q.score.textContent = `${right} / ${answered}`;
+        q.next.focus({ preventScroll: true });
+      })
+    );
+
+    q.next.addEventListener("click", () => {
+      if (qi < sc.length - 1) { qi++; render(); return; }
+      q.card.hidden = true;
+      q.done.hidden = false;
+      const pct = right / sc.length;
+      $(".qd-emoji").textContent = pct === 1 ? "🏆" : pct >= 0.6 ? "🎉" : "🤔";
+      $(".qd-title").textContent = `${right} out of ${sc.length}`;
+      $(".qd-text").textContent = cfg.summary(sc);
+    });
+
+    $(".q-restart").addEventListener("click", () => { qi = 0; right = 0; answered = 0; render(); });
+    render();
   });
 
-  document.getElementById("q-restart").addEventListener("click", () => {
-    qi = 0; right = 0; answered = 0;
-    renderQuestion();
-  });
-  renderQuestion();
+  /* ---------- Who-does-what matrix: spotlight a team column ---------- */
+  const matrix = document.querySelector(".matrix");
+  if (matrix) {
+    const picks = Array.from(matrix.querySelectorAll(".team-pick"));
+    picks.forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const col = btn.dataset.col;
+        const on = matrix.dataset.spot === col ? "" : col;
+        matrix.dataset.spot = on;
+        picks.forEach((b) => b.classList.toggle("is-on", b.dataset.col === on));
+      })
+    );
+  }
 
   /* ---------- Slide 10 · Tick boxes ---------- */
   document.querySelectorAll(".tick").forEach((t) =>

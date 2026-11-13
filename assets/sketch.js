@@ -8,9 +8,15 @@
    - Filters that make edges look hand-drawn:
        #ce-rough       boxes, cards, buttons (used by .sk / .card / .btn / .pill / .note)
        #ce-rough-soft  smaller wobble for characters, icons and thin lines
-   - Reusable doodles. Draw them with <svg><use href="#ce-doodle-…"/></svg>:
+   - Reusable doodles. Draw them with
+       <svg class="doodle" viewBox="0 0 W H"><use href="#ce-doodle-…"/></svg>
+     where W and H are the last two numbers of the symbol's viewBox. The outer
+     viewBox must start at 0 0, or the drawing is offset inside its box:
+       provider 140×150 · us 145×165 · person 100×165 · key 120×56
+       cloud 640×360 · rack 82×132 · arrow 120×60
        #ce-doodle-provider   person in a hard hat holding a spanner (= the provider)
        #ce-doodle-us         person waving (= us / the client)
+       #ce-doodle-person     plain team member; body colour via --doodle-body (default --customer)
        #ce-doodle-key        a key (= access / identity)
        #ce-doodle-cloud      a cloud outline
        #ce-doodle-rack       a server rack
@@ -60,6 +66,17 @@
     </g>
     <circle cx="-11" cy="42" r="3.5" fill="var(--ink)"/><circle cx="11" cy="42" r="3.5" fill="var(--ink)"/>
     <path d="M-10 56 Q 0 64 10 56" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- Person: a plain team member. Set the body colour per use with style="--doodle-body: var(--token)" -->
+  <symbol id="ce-doodle-person" viewBox="-50 -8 100 165">
+    <g filter="url(#ce-rough-soft)" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M-46 154 Q -46 72 0 72 Q 46 72 46 154 Z" fill="var(--doodle-body, var(--customer))"/>
+      <circle cx="0" cy="38" r="34" fill="var(--skin)"/>
+      <path d="M-34 30 Q -34 -2 0 -2 Q 34 -2 34 30 Q 20 14 -6 16 Q -24 18 -34 30 Z" fill="var(--hair)"/>
+    </g>
+    <circle cx="-11" cy="42" r="3.5" fill="var(--ink)"/><circle cx="11" cy="42" r="3.5" fill="var(--ink)"/>
+    <path d="M-10 56 Q 0 63 10 56" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
   </symbol>
 
   <!-- Key -->
